@@ -4,7 +4,7 @@ metadata:
   name: db-service
   namespace: prod
   labels:
-    name: db
+    app: db-app
 spec:
   clusterIP: None
   ports:
@@ -18,50 +18,51 @@ metadata:
   name: db-state
   namespace: prod
   labels:
-    name: db-app
+    app: db-app
     author: Tawfeeq
+
 spec:
   serviceName: db-service
   replicas: 1
+
   selector:
     matchLabels:
       app: db-app
+
   template:
     metadata:
       labels:
         app: db-app
+
     spec:
-       containers:
-         - name: mysql-db
-           image: mysql:8.0.33
-           ports:
-             - containerPort: 3306
-           env:
-             - name: MYSQL_ROOT_PASSWORD
-               valueFrom:
-                 secretKeyRef:
-                   name: db-secret
-                   key: MYSQL_ROOT_PASSWORD
-             - name: MYSQL_DATABASE:
-               valueFrom:
-                 secretKeyRef:
-                   name: db-secret
-                   key: MYSQL_DATABASE
-           volumeMounts:
-             - name: mysql-volume
-               mountPath: /var/lib/mysql
-    volumeClaimTemplates:
-      - metadata:
-          name: mysql-volume
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 5Gi
+      containers:
+        - name: mysql-db
+          image: mysql:8.0.33
+          ports:
+            - containerPort: 3306
 
-      
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: MYSQL_ROOT_PASSWORD
 
+            - name: MYSQL_DATABASE   # ✅ fixed
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: MYSQL_DATABASE
 
-      
+          volumeMounts:
+            - name: mysql-volume
+              mountPath: /var/lib/mysql
 
-
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-volume
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
-metadate:
-  name: app-deploymen
+metadata:
+  name: app-deployment
   namespace: prod
   labels:
     app: app-dep
@@ -9,15 +9,15 @@ metadate:
 spec:
   replicas: 3
   strategy:
-    type: RolingUpdate
+    type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
   selector:
-    matchLables:
+    matchLabels:
       app: app-dep
   template:
-    metadate:
+    metadata:
       labels:
         app: app-dep
     spec:
@@ -28,13 +28,13 @@ spec:
             - name: app-port
               containerPort: 8080
           resources:
-            rquests:
-              cpu: 150m
+            requests:
+              cpu: 150
               memory: 120Mi
             limits:
               cpu: 250m
               memory: 240Mi
-          livenessPrrobe:
+          livenessProbe:
             httpGet:
               path: /
               port: 8080
