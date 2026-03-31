@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: app-sservice
+  name: web-service
   namespace: prod
   labels:
-    name: app-ser
+    app: web
     author: Tawfeeq
 spec:
   type: ClusterIP
   ports:
-    - targetPort: app-port
+    - targetPort: web-port
       port: 80
       protocol: TCP
   selector:
-    app: app-dep 
+    app: web-dep

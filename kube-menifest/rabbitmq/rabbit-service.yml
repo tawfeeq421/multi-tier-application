@@ -1,16 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: app-sservice
+  name: rabbit-service
   namespace: prod
   labels:
-    name: app-ser
+    app: rabbit
     author: Tawfeeq
 spec:
-  type: ClusterIP
+  type: ClusterIp
   ports:
-    - targetPort: app-port
+    - targetPort: rab-port
       port: 80
-      protocol: TCP
+      procotol: TCP
+
   selector:
-    app: app-dep 
+    app: rab-dep

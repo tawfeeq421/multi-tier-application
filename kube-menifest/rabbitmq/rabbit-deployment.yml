@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment
+  namespace: prod
+  labels:
+    app: rabbitmq
+    author: Tawfeeq
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rab-dep
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailabel: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: rab-dep
+    spec:
+      containers:
+        - name: rabbit
+          image: rabbitmq
+          ports:
+            - name: rab-port
+              containerPort: 15672
+          resources:
+            requests:
+              cpu: 150m
+              memory: 120Mi
+            limits:
+              cpu: 250m
+              memory: 240Mi
+
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 15672
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 15672
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+
