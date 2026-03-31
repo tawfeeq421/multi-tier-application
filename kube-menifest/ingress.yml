@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  namespace: prod
+  lebels:
+    name: mying
+  annotation:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - vprofile.com
+      secretName: vpro-tls
+  rules:
+    - host: vprofile.com
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            name: web-service
+            port:
+              number: 80
