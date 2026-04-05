@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK11'          // 🔥 use JDK11 for Sonar compatibility
+        jdk 'JDK11'
         maven 'maven9'
     }
 
@@ -35,6 +35,8 @@ pipeline {
         stage("Sonar Code Analysis") {
             environment {
                 scannerHome = tool 'sonar6.2'
+                JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+                PATH = "${JAVA_HOME}/bin:${env.PATH}"
             }
             steps {
                 withSonarQubeEnv('sonar-server') {
