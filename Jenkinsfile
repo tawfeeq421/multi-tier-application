@@ -9,7 +9,7 @@ pipeline {
 	stages{
 	    stage('Checkout'){
 		   steps{
-		      git 'https://github.com/tawfeeq421/multi-tier-application.git'
+		      git branch: 'main', url: 'https://github.com/tawfeeq421/multi-tier-application.git'
 		   }
 		}
 		
