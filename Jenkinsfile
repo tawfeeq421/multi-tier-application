@@ -6,11 +6,6 @@ pipeline {
 	   maven 'maven9'
 	   
 	}
-	environment {
-	    VERSION = "1.0.${BUILD_NUMBER}"
-	    SLACK_SERVER = "#devopscicd"
-	    DOCKER_CREDS = credentials('docker-hub')
-	}
 	stages{
 	    stage('Checkout'){
 		   steps{
