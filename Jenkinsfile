@@ -20,6 +20,11 @@ pipeline {
                 sh 'mvn clean install -DskipTests'
             }
         }
+        stage('Build'){
+            steps(
+                sh 'mvn test'
+            )
+        }
     }
     post{
         always{
