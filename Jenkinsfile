@@ -68,7 +68,11 @@ pipeline {
                 }
             }
         }
-
+        stage('Trivy FS Scan') {
+            steps {
+                sh 'trivy fs . > trivyfs.txt'
+            }
+        }
         stage('Build App Image') {
             steps {
                 script {
