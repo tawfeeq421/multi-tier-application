@@ -80,6 +80,7 @@ pipeline {
             steps {
                 script {
                     def dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/")
+                    sh "docker tag ${appRegistry}:${BUILD_NUMBER} ${appRegistry}:latest"
                 }
             }
         }
