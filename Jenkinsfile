@@ -76,7 +76,7 @@ pipeline {
         stage('Build App Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/")
+                    def dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/")
                 }
             }
         }
