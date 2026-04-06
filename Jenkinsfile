@@ -90,6 +90,16 @@ pipeline {
             }
           }
         }
+        stage('Trivy Image Scan') {
+            steps {
+                sh "trivy image ${appRegistry}:${BUILD_NUMBER} > trivyimage.txt"
+            }
+        }
+        stage('Remove Container Images'){
+            steps{
+                sh 'docker rmi -f $(docker images -a -q)'
+            }
+        }
     }
 
     post {
