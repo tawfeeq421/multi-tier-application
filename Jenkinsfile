@@ -1,3 +1,8 @@
+COLOR_MAP = [
+    'SUCCESS': 'good',
+    "FAILURE": 'danger'
+]
+
 pipeline {
     agent any
     tools{
@@ -14,6 +19,14 @@ pipeline {
             steps{
                 sh 'mvn clean install -DskipTests'
             }
+        }
+    }
+    post{
+        always{
+            echo 'Slack Notification.'
+            slackSend channel: '#devopscicd',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NAME} \n more info at: ${env.BUILD_URL}"
         }
     }
 }
