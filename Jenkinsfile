@@ -1,64 +1,96 @@
-COLOR_MAP = [
+def COLOR_MAP = [
     'SUCCESS': 'good',
-    "FAILURE": 'danger'
+    'FAILURE': 'danger'
 ]
 
 pipeline {
     agent any
-    tools{
+
+    tools {
         jdk "JDK17"
         maven "MAVEN3.9"
     }
-    stages{
-        stage('Checkout'){
-            steps{
+
+    environment {
+        registryCredential = 'ecr:ap-south-1:awscreds'
+        appRegistry = "554903865932.dkr.ecr.ap-south-1.amazonaws.com/javaapp"
+        vprofileRegistry = "https://554903865932.dkr.ecr.ap-south-1.amazonaws.com"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
                 git branch: 'main', url: 'https://github.com/tawfeeq421/multi-tier-application.git'
             }
         }
-        stage('Build'){
-            steps{
+
+        stage('Build') {
+            steps {
                 sh 'mvn clean install -DskipTests'
             }
         }
-        stage('Unit Test'){
-            steps{
+
+        stage('Unit Test') {
+            steps {
                 sh 'mvn test'
             }
         }
-        stage('Chckstyle Analysis'){
-            steps{
+
+        stage('Checkstyle Analysis') {
+            steps {
                 sh 'mvn checkstyle:checkstyle'
             }
         }
+
         stage("Sonar Code Analysis") {
             environment {
-               scannerHome = tool 'sonar'
-          }
-           steps {
-              withSonarQubeEnv('sonarserver') {
-                 sh """
-                 ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=vprofile \
-                -Dsonar.projectName=vprofile \
-                -Dsonar.projectVersion=1.0 \
-                -Dsonar.sources=src/ \
-                -Dsonar.java.binaries=target/classes \
-                -Dsonar.junit.reportsPath=target/surefire-reports \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-                """
-                }
-           }
-        }
-         stage("Quality Gate") {
+                scannerHome = tool 'sonar'
+            }
             steps {
-              timeout(time: 1, unit: 'HOURS') {
-                waitForQualityGate abortPipeline: true
+                withSonarQubeEnv('sonarserver') {
+                    sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=vprofile \
+                    -Dsonar.projectName=vprofile \
+                    -Dsonar.projectVersion=1.0 \
+                    -Dsonar.sources=src/ \
+                    -Dsonar.java.binaries=target/classes \
+                    -Dsonar.junit.reportsPath=target/surefire-reports \
+                    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                    """
+                }
+            }
+        }
+
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build App Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/multistage/")
+                }
+            }
+        }
+        stage('Upload App Image') {
+            steps{
+                script {
+                   docker.withRegistry( vprofileRegistry, registryCredential ) {
+                     dockerImage.push("$BUILD_NUMBER")
+                     dockerImage.push('latest')
               }
             }
           }
+        }
     }
-    post{
-        always{
+
+    post {
+        always {
             echo 'Slack Notification.'
             slackSend channel: '#devopscicd',
                 color: COLOR_MAP[currentBuild.currentResult],
