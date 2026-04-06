@@ -26,7 +26,7 @@ pipeline {
             echo 'Slack Notification.'
             slackSend channel: '#devopscicd',
                 color: COLOR_MAP[currentBuild.currentResult],
-                message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NAME} \n more info at: ${env.BUILD_URL}"
+                message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n more info at: ${env.BUILD_URL}"
         }
     }
 }
