@@ -21,9 +21,9 @@ pipeline {
             }
         }
         stage('Build'){
-            steps(
+            steps{
                 sh 'mvn test'
-            )
+            }
         }
     }
     post{
