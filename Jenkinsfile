@@ -2,6 +2,7 @@ def COLOR_MAP = [
     'SUCCESS': 'good',
     'FAILURE': 'danger'
 ]
+
 pipeline {
     agent any
 
@@ -13,7 +14,7 @@ pipeline {
     environment {
         registryCredential = 'awscreds'
         appRegistry = "554903865932.dkr.ecr.ap-south-1.amazonaws.com/javaapp"
-        vprofileRegistry = "https://554903865932.dkr.ecr.ap-south-1.amazonaws.com"
+        vprofileRegistry = "554903865932.dkr.ecr.ap-south-1.amazonaws.com"
     }
 
     stages {
@@ -68,35 +69,43 @@ pipeline {
                 }
             }
         }
+
         stage('Trivy FS Scan') {
             steps {
                 sh 'trivy fs . > trivyfs.txt'
             }
         }
+
         stage('Build App Image') {
             steps {
                 script {
-                    def dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/")
+                    dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/")
                 }
             }
         }
+
         stage('Upload App Image') {
-            steps{
+            steps {
                 script {
-                   docker.withRegistry( vprofileRegistry, registryCredential ) {
-                     dockerImage.push("$BUILD_NUMBER")
-                     dockerImage.push('latest')
-              }
+                    sh """
+                    aws ecr get-login-password --region ap-south-1 | \
+                    docker login --username AWS --password-stdin ${vprofileRegistry}
+
+                    docker push ${appRegistry}:${BUILD_NUMBER}
+                    docker push ${appRegistry}:latest
+                    """
+                }
             }
-          }
         }
+
         stage('Trivy Image Scan') {
             steps {
                 sh "trivy image ${appRegistry}:${BUILD_NUMBER} > trivyimage.txt"
             }
         }
-        stage('Remove Container Images'){
-            steps{
+
+        stage('Remove Container Images') {
+            steps {
                 sh 'docker rmi -f $(docker images -a -q)'
             }
         }
