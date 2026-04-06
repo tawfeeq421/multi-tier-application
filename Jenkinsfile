@@ -10,5 +10,10 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/tawfeeq421/multi-tier-application.git'
             }
         }
+        stage('Build'){
+            steps{
+                sh 'mvn clean install -DskipTests'
+            }
+        }
     }
 }
