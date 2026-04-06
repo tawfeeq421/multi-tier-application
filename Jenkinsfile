@@ -79,7 +79,7 @@ pipeline {
         stage('Build App Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/")
+                    def dockerImage = docker.build("${appRegistry}:${BUILD_NUMBER}", "./Docker-files/app/")
                 }
             }
         }
@@ -87,13 +87,18 @@ pipeline {
         stage('Upload App Image') {
             steps {
                 script {
-                    sh """
-                    aws ecr get-login-password --region ap-south-1 | \
-                    docker login --username AWS --password-stdin ${vprofileRegistry}
+                    withCredentials([[
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'awscreds'
+                    ]]) {
+                        sh """
+                        aws ecr get-login-password --region ap-south-1 | \
+                        docker login --username AWS --password-stdin ${vprofileRegistry}
 
-                    docker push ${appRegistry}:${BUILD_NUMBER}
-                    docker push ${appRegistry}:latest
-                    """
+                        docker push ${appRegistry}:${BUILD_NUMBER}
+                        docker push ${appRegistry}:latest
+                        """
+                    }
                 }
             }
         }
