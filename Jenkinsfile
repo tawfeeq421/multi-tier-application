@@ -75,7 +75,6 @@ pipeline {
                 sh 'trivy fs . > trivyfs.txt'
             }
         }
-
         stage('Build App Image') {
             steps {
                 script {
